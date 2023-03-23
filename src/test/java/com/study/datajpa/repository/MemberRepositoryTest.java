@@ -4,7 +4,6 @@ import com.study.datajpa.entity.Member;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -34,6 +33,8 @@ class MemberRepositoryTest {
     void basicCRUD() {
         Member member1 = new Member("member1");
         Member member2 = new Member("member2");
+        memberRepository.save(member1);
+        memberRepository.save(member2);
 
         // 단건 조회 검증
         Member findMember1 = memberRepository.findById(member1.getId()).get();
