@@ -14,6 +14,8 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +33,9 @@ class MemberRepositoryTest {
 
     @Autowired
     TeamRepository teamRepository;
+
+    @PersistenceContext
+    EntityManager em;
 
     @Test
     void testMember() {
@@ -273,5 +278,36 @@ class MemberRepositoryTest {
         assertThat(page.getTotalPages()).isEqualTo(2); // 총 2 페이지
         assertThat(page.isFirst()).isTrue(); // 첫 페이지 여부
         assertThat(page.hasNext()).isTrue(); // 다음 페이지 존재 여부
+    }
+
+    @Test
+    @DisplayName("벌크성 수정 쿼리 테스트 - 20살 이상인 경우는 모두 1살씩 증가 시키기")
+    void bulkUpdate() {
+        // given
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 19));
+        memberRepository.save(new Member("member3", 20));
+        memberRepository.save(new Member("member4", 24));
+        memberRepository.save(new Member("member5", 40));
+
+        // when
+        int resultCount = memberRepository.bulkAgePlus(20);
+
+        /**
+         * 벌크수정의 경우, 영속성 컨텍스트 거치지 않고 바로 디비 update 쿼리 문 날리므로,
+         * 영속성을 flush, clear 해줘야 영속성 컨텍스트의 엔티티 상태와 DB의 엔티티 상태 같아질 수 있음
+         * 즉, flush, clear 안하고 member5 조회시, 나이는 그대로 40
+         *
+         * 방법1 : 아래 처럼 em.flush(), em.clear() 해주기
+         * 방법2 : clearAutomatically = true 옵션 추가  ex) @Modifying(clearAutomatically = true)
+         */
+//        em.flush();
+//        em.clear();
+
+        Member member5 = memberRepository.findMemberByUsername("member5");
+        log.info("member5={}", member5);
+
+        // then
+        assertThat(resultCount).isEqualTo(3);
     }
 }
