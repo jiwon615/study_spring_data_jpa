@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -125,6 +126,19 @@ class MemberRepositoryTest {
         List<MemberDto> result = memberRepository.findMemberDto();
         for (MemberDto dto : result) {
             log.info("dto = {}", dto);
+        }
+    }
+
+    @Test
+    @DisplayName("쿼리 메소드 테스트3- 컬렉션 파라미터 바인딩")
+    void findByNames() {
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("BBB", 20);
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+        List<Member> result = memberRepository.findByNames(Arrays.asList("AAA", "BBB"));
+        for (Member member : result) {
+            log.info("member = {}", member);
         }
     }
 }

@@ -29,4 +29,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
    // @Query 방식 2 - 기본 타입 조회  (DTO는 마치 생성해서 반환하는 것처럼 패키지명 다 함께 적어주어야함. 생성자(allArgsCons)필수)
    @Query("select new com.study.datajpa.dto.MemberDto(m.id, m.username, t.name) from Member m join m.team t")
    List<MemberDto> findMemberDto(); // memberDto 전체 조회
+
+   // @Query 방식 2 - 컬렉션 파라미터 바인딩
+   @Query("select m from Member m where m.username in :names")
+   List<Member> findByNames(@Param("names") List<String> names);
+
 }
