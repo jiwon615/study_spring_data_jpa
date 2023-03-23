@@ -1,6 +1,8 @@
 package com.study.datajpa.repository;
 
+import com.study.datajpa.dto.MemberDto;
 import com.study.datajpa.entity.Member;
+import com.study.datajpa.entity.Team;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,9 @@ class MemberRepositoryTest {
 
     @Autowired
     MemberRepository memberRepository;
+
+    @Autowired
+    TeamRepository teamRepository;
 
     @Test
     void testMember() {
@@ -62,7 +67,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    @DisplayName("쿼리 메소드 테스트")
+    @DisplayName("쿼리 메소드 테스트 - 메소드 이름(1)")
     void findByUsernameAndAgeGreaterThen() {
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("AAA", 20);
@@ -76,10 +81,50 @@ class MemberRepositoryTest {
     }
 
     @Test
-    @DisplayName("쿼리 메소드 테스트2")
+    @DisplayName("쿼리 메소드 테스트2 - 메소드 이름(2)")
     void findBy() {
         List<Member> helloBy = memberRepository.findHelloBy();
         log.info("=======");
         List<Member> findTop3HelloBy = memberRepository.findTop3HelloBy();
+    }
+
+    @Test
+    @DisplayName("쿼리 메소드 테스트3- @Query 애노테이션 사용해서 레파지토리 인터페이스에 쿼리 직접 정의(1)")
+    void findUser() {
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("BBB", 20);
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+        List<Member> result = memberRepository.findUser("AAA", 10);
+        assertThat(result.get(0)).isEqualTo(m1);
+    }
+
+    @Test
+    @DisplayName("쿼리 메소드 테스트3- @Query 애노테이션 사용해서 레파지토리 인터페이스에 쿼리 직접 정의(2)")
+    void findUsernameList() {
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("BBB", 20);
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+        List<String> result = memberRepository.findUsernameList();
+        for (String name : result) {
+            log.info("name = {}", name);
+        }
+    }
+
+    @Test
+    @DisplayName("쿼리 메소드 테스트3- @Query 애노테이션 사용해서 레파지토리 인터페이스에 쿼리 직접 정의(3)")
+    void findMemberDto() {
+        Team team = new Team("teamA");
+        teamRepository.save(team);
+
+        Member m1 = new Member("AAA", 10);
+        m1.setTeam(team);
+        memberRepository.save(m1);
+
+        List<MemberDto> result = memberRepository.findMemberDto();
+        for (MemberDto dto : result) {
+            log.info("dto = {}", dto);
+        }
     }
 }
