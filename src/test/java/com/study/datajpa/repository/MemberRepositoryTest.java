@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -140,5 +141,31 @@ class MemberRepositoryTest {
         for (Member member : result) {
             log.info("member = {}", member);
         }
+    }
+
+    @Test
+    @DisplayName("다양한 반환 타입 테스트")
+    void returnTypes() {
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("BBB", 20);
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+
+        // 리스트 : 값이 없는 경우 빈 컬랙션 반환 ( [])
+        List<Member> result = memberRepository.findListByUsername("AAA");
+        log.info(String.valueOf(result));
+        for (Member member : result) {
+            log.info("result = {}", member);
+            log.info("=======");
+        }
+
+        // 단건 : 값이 없는 경우 null 반환
+        Member result2 = memberRepository.findMemberByUsername("AAA");
+        log.info("result2 = {}", result2);
+        log.info("=======");
+
+        // Optional: 값이 없는 경우 Optional.empty 반환
+        Optional<Member> result3 = memberRepository.findOptionalByUsername("AAA");
+        log.info("result3 = {}", result3);
     }
 }

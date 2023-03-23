@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @Repository 넣지 않아도, interface로 되어만 있으면, 스프링부트가 자동으로 읽고,
@@ -34,4 +35,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
    @Query("select m from Member m where m.username in :names")
    List<Member> findByNames(@Param("names") List<String> names);
 
+   // 다양한 반환타입 (find...By 사이는 이름 아무거나 넣어도 됨)
+   List<Member> findListByUsername(String username); // 컬렉션
+   Member findMemberByUsername(String username); // 단건
+   Optional<Member> findOptionalByUsername(String username); // 단건 optional
 }
