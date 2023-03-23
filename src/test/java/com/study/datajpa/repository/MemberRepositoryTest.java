@@ -8,6 +8,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -170,7 +174,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    @DisplayName("페이징 테스트")
+    @DisplayName("페이징 테스트 - Page 반환타입 (count 쿼리 O)")
     void paging() {
         // given
         memberRepository.save(new Member("member1", 10));
@@ -183,8 +187,91 @@ class MemberRepositoryTest {
         int offset = 0; // jpa는 0부터 페이징 시작한다
         int limit = 3;
 
+        // Pageable의 구현체
+        PageRequest pageRequest = PageRequest.of(offset, limit, Sort.by(Sort.Direction.DESC, "username"));
+
         // when
+        Page<Member> page = memberRepository.findPageByAge(age, pageRequest);
 
         // then
+        List<Member> content = page.getContent();
+        for (Member member : content) {
+            log.info("member = {}", member);
+        }
+
+        assertThat(content.size()).isEqualTo(3);
+        assertThat(page.getTotalElements()).isEqualTo(5); // totalCount
+        assertThat(page.getNumber()).isEqualTo(0);
+        assertThat(page.getTotalPages()).isEqualTo(2); // 총 2 페이지
+        assertThat(page.isFirst()).isTrue(); // 첫 페이지 여부
+        assertThat(page.hasNext()).isTrue(); // 다음 페이지 존재 여부
+    }
+
+    @Test
+    @DisplayName("페이징 테스트 - Slice 반환타입 (count 쿼리 X)")
+    void paging2() {
+        // given
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 10));
+        memberRepository.save(new Member("member3", 10));
+        memberRepository.save(new Member("member4", 10));
+        memberRepository.save(new Member("member5", 10));
+
+        int age = 10;
+        int offset = 0; // jpa는 0부터 페이징 시작한다
+        int limit = 3;
+
+        // Pageable의 구현체
+        PageRequest pageRequest = PageRequest.of(offset, limit, Sort.by(Sort.Direction.DESC, "username"));
+
+        // when
+        Slice<Member> page = memberRepository.findSliceByAge(age, pageRequest);
+//        List<Member> page = memberRepository.findListByAge(age, pageRequest);
+
+        // then
+        List<Member> content = page.getContent();
+        for (Member member : content) {
+            log.info("member = {}", member);
+        }
+
+        assertThat(content.size()).isEqualTo(3);
+        assertThat(page.getNumber()).isEqualTo(0);
+        assertThat(page.isFirst()).isTrue(); // 첫 페이지 여부
+        assertThat(page.hasNext()).isTrue(); // 다음 페이지 존재 여부
+    }
+
+    @Test
+    @DisplayName("페이징 테스트 - Page 반환타입 & JPQL 사용해서 join")
+    void paging3() {
+        // given
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 10));
+        memberRepository.save(new Member("member3", 10));
+        memberRepository.save(new Member("member4", 10));
+        memberRepository.save(new Member("member5", 10));
+
+        int age = 10;
+        int offset = 0; // jpa는 0부터 페이징 시작한다
+        int limit = 3;
+
+        // Pageable의 구현체
+        PageRequest pageRequest = PageRequest.of(offset, limit, Sort.by(Sort.Direction.DESC, "username"));
+
+        // when
+//        Page<Member> page = memberRepository.findMemberByAge(age, pageRequest); // countQuery도 JOIN
+        Page<Member> page = memberRepository.findMemberFasterByAge(age, pageRequest); // countQuery는 별도 분리
+
+        // then
+        List<Member> content = page.getContent();
+        for (Member member : content) {
+            log.info("member = {}", member);
+        }
+
+        assertThat(content.size()).isEqualTo(3);
+        assertThat(page.getTotalElements()).isEqualTo(5); // totalCount
+        assertThat(page.getNumber()).isEqualTo(0);
+        assertThat(page.getTotalPages()).isEqualTo(2); // 총 2 페이지
+        assertThat(page.isFirst()).isTrue(); // 첫 페이지 여부
+        assertThat(page.hasNext()).isTrue(); // 다음 페이지 존재 여부
     }
 }
