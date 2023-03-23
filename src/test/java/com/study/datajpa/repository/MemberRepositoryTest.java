@@ -168,4 +168,23 @@ class MemberRepositoryTest {
         Optional<Member> result3 = memberRepository.findOptionalByUsername("AAA");
         log.info("result3 = {}", result3);
     }
+
+    @Test
+    @DisplayName("페이징 테스트")
+    void paging() {
+        // given
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 10));
+        memberRepository.save(new Member("member3", 10));
+        memberRepository.save(new Member("member4", 10));
+        memberRepository.save(new Member("member5", 10));
+
+        int age = 10;
+        int offset = 0; // jpa는 0부터 페이징 시작한다
+        int limit = 3;
+
+        // when
+
+        // then
+    }
 }
