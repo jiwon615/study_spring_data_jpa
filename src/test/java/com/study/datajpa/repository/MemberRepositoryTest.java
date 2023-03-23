@@ -265,7 +265,8 @@ class MemberRepositoryTest {
         // when
 //        Page<Member> page = memberRepository.findMemberByAge(age, pageRequest); // countQuery도 JOIN
         Page<Member> page = memberRepository.findMemberFasterByAge(age, pageRequest); // countQuery는 별도 분리
-
+        // Page를 유지하면서 ENTITY -> DTO 로 변환
+        Page<MemberDto> dtoPage = page.map(m -> new MemberDto());
         // then
         List<Member> content = page.getContent();
         for (Member member : content) {
