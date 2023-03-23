@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/datajpa
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create  # 애플리케이션 로딩시점에 테이블 다 Drop 후 생성
+    properties:
+      hibernate:
+        format_sql: true  # 쿼리가 이쁘게 나옴
+#        show_sql: true # JPA가 실행한 쿼리를 콘솔에 다 출력 (이거 대신 loggin.level.org.hibernate.sql: debug로 하면 로그파일로 남음)
+logging.level:
+  org.hibernate.SQL: debug
+#  org.hibernate.type: trace # 파라미터 바인딩 된 쿼리까지 같이 보는 기능
