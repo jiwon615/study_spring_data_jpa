@@ -1,6 +1,8 @@
 package com.study.datajpa.repository;
 
 import com.study.datajpa.entity.Member;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,6 +12,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Slf4j
 @SpringBootTest
 @Transactional // jpa의 모든 변경은 트랜잭션 안에서 이루어져야 하므로, Transactional 필요
 //@Rollback(false) // transaction 끝나면 결과 롤백해버리므로, 디비에 값을 확인해볼 수 없어서 테스트에서는 공부를 위해 rollback(false)
@@ -56,5 +59,27 @@ class MemberRepositoryTest {
 
         long deletedCount = memberRepository.count();
         assertThat(deletedCount).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("쿼리 메소드 테스트")
+    void findByUsernameAndAgeGreaterThen() {
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("AAA", 20);
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+
+        List<Member> result = memberRepository.findByUsernameAndAgeGreaterThan("AAA", 15);
+        assertThat(result.get(0).getUsername()).isEqualTo("AAA");
+        assertThat(result.get(0).getAge()).isEqualTo(20);
+        assertThat(result.size()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("쿼리 메소드 테스트2")
+    void findBy() {
+        List<Member> helloBy = memberRepository.findHelloBy();
+        log.info("=======");
+        List<Member> findTop3HelloBy = memberRepository.findTop3HelloBy();
     }
 }
