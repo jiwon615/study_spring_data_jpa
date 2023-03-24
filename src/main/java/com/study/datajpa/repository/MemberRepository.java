@@ -5,6 +5,7 @@ import com.study.datajpa.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -63,4 +64,18 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Modifying(clearAutomatically = true) // 벌크성 수정, 삭제 쿼리는 @Modifying 사용! 사용 안하면 예외발생
     @Query("update Member m set m.age = m.age + 1 where m.age >= :age")
     int bulkAgePlus(@Param("age") int age);
+
+    /**
+     *  N+1 문제 해결하는 방법
+     */
+    @Override
+    @EntityGraph(attributePaths = {"team"})  // 방식 1: 공통 메소드 오버라이드 (JPQL 사용 안하는 방식)
+    List<Member> findAll();
+
+    @EntityGraph(attributePaths = {"team"})  // 방식 2: JPQL + EntityGraph (1번과 동일 결과)
+    @Query("select m from Member m")
+    List<Member> findMemberEntityGraph();
+
+    @EntityGraph(attributePaths = {"team"})  // 방식3: 파라미터 넣는 방식
+    List<Member> findEntityGraphByUsername(@Param("username") String username);
 }

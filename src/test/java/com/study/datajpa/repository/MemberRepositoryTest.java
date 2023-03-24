@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -25,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 @SpringBootTest
 @Transactional // jpa의 모든 변경은 트랜잭션 안에서 이루어져야 하므로, Transactional 필요
-//@Rollback(false) // transaction 끝나면 결과 롤백해버리므로, 디비에 값을 확인해볼 수 없어서 테스트에서는 공부를 위해 rollback(false)
+@Rollback(false) // transaction 끝나면 결과 롤백해버리므로, 디비에 값을 확인해볼 수 없어서 테스트에서는 공부를 위해 rollback(false)
 class MemberRepositoryTest {
 
     @Autowired
@@ -310,5 +311,36 @@ class MemberRepositoryTest {
 
         // then
         assertThat(resultCount).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("지연로딩 관계에서 N+1 문제 및 해결")
+    void findMemberLazy() {
+        // given
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        Team teamC = new Team("teamC");
+        Team teamD = new Team("teamD");
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+        teamRepository.save(teamC);
+        teamRepository.save(teamD);
+        memberRepository.save(new Member("member1", 10, teamA));
+        memberRepository.save(new Member("member2", 20, teamB));
+        memberRepository.save(new Member("member3", 30, teamC));
+        memberRepository.save(new Member("member4", 40, teamD));
+        memberRepository.save(new Member("member4", 50, teamD));
+
+        em.flush();
+        em.clear();
+
+        // when
+//        List<Member> members = memberRepository.findAll(); // N+1 문제 (override하여 EntityGraph 적용 전에는 N+1 터짐)
+//        List<Member> members = memberRepository.findMemberEntityGraph(); // N+1 문제 해결 (JPQL + EntityGraph)
+        List<Member> members = memberRepository.findEntityGraphByUsername("member1"); // N+1 문제 (파라미터 넣는 방식)
+        for (Member member : members) {
+            log.info("member.getTeam()은 가짜 프록시 객체={}", member.getTeam().getClass());
+            log.info("getTeam().getName()={}", member.getTeam().getName());
+        }
     }
 }
