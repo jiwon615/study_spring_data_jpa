@@ -343,4 +343,20 @@ class MemberRepositoryTest {
             log.info("getTeam().getName()={}", member.getTeam().getName());
         }
     }
+
+    @Test
+    @DisplayName("조회용으로 사용하기 위한 쿼리 힌트")
+    void queryHint() {
+        // given
+        memberRepository.save(new Member("member1", 10));
+        em.flush(); // 디비에 쿼리날림 (아직 영속성 컨텍스트에는 member 남아있음)
+        em.clear(); // 1차 캐쉬 지움으로써 영속성 컨텍스트 깨끗히 비움
+
+        // when
+        Member member = memberRepository.findReadOnlyByUsername("member1");
+        member.setUsername("member2");
+
+        // then
+        em.flush(); // hint 적용 안하면, 이때 update 쿼리문 날라가지만, hint문 적용시 update 안됨
+    }
 }
