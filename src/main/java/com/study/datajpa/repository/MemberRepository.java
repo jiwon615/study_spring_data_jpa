@@ -2,6 +2,8 @@ package com.study.datajpa.repository;
 
 import com.study.datajpa.dto.MemberDto;
 import com.study.datajpa.entity.Member;
+import com.study.datajpa.repository.projections.UsernameOnly;
+import com.study.datajpa.repository.projections.UsernameOnlyDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -87,4 +89,14 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     // Lock
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<Member> findLockByUsername(String name);
+
+    /**
+     * Projections
+     */
+
+    // 1: 인터페이스 기반 Projection 사용
+//    List<UsernameOnly> findProjectionsByUsername(@Param("username") String username);
+    <T> List<T> findProjectionsByUsername(@Param("username") String username, Class<T> type); // 위 방법은 동적 projection으로 변경
+    // 2: 클래스 기반 Projection 사용
+    List<UsernameOnlyDto> findProjections2ByUsername(@Param("username") String username);
 }

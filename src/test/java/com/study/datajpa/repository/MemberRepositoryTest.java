@@ -3,6 +3,9 @@ package com.study.datajpa.repository;
 import com.study.datajpa.dto.MemberDto;
 import com.study.datajpa.entity.Member;
 import com.study.datajpa.entity.Team;
+import com.study.datajpa.repository.projections.NestedClosedProjections;
+import com.study.datajpa.repository.projections.UsernameOnly;
+import com.study.datajpa.repository.projections.UsernameOnlyDto;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -364,5 +367,67 @@ class MemberRepositoryTest {
     @DisplayName("사용자 정의 레포지토리 구현 메소드 실행")
     void findMemberCustom() {
         List<Member> memberCustom = memberRepository.findMemberCustom();
+    }
+
+    @Test
+    @DisplayName("Projections 테스트- 인터페이스 기반 & 클래스기반 사용")
+    void projectionTest() {
+        // given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 10, teamA);
+        Member m2 = new Member("m2", 20, teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        // when
+
+        // 1: 인터페이스 기반 Projection 사용
+        List<UsernameOnly> result = memberRepository.findProjectionsByUsername("m1", UsernameOnly.class);
+        for (UsernameOnly usernameOnly : result) {
+            log.info("getUsername1={}", usernameOnly.getUsername());
+        }
+
+        // 2: 클래스 기반 Projection 사용
+        List<UsernameOnlyDto> result2 = memberRepository.findProjections2ByUsername("m1");
+
+        for (UsernameOnlyDto usernameOnly : result2) {
+            log.info("getUsername2={}", usernameOnly.getUsername());
+        }
+
+        // then
+        assertThat(result.size()).isEqualTo(1);
+        assertThat(result2.size()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Projections 테스트- 중첩구조 처리")
+    void projectionTest2() {
+        // given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 10, teamA);
+        Member m2 = new Member("m2", 20, teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        // when
+
+        List<NestedClosedProjections> result = memberRepository.findProjectionsByUsername("m1", NestedClosedProjections.class);
+        for (NestedClosedProjections usernameOnly : result) {
+            log.info("username={}", usernameOnly.getUsername());
+            log.info("teamName={}", usernameOnly.getTeam().getName());
+        }
+
+        // then
+        assertThat(result.size()).isEqualTo(1);
     }
 }
