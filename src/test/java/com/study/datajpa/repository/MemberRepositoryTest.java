@@ -359,4 +359,10 @@ class MemberRepositoryTest {
         // then
         em.flush(); // hint 적용 안하면, 이때 update 쿼리문 날라가지만, hint문 적용시 update 안됨
     }
+
+    @Test
+    @DisplayName("사용자 정의 레포지토리 구현 메소드 실행")
+    void findMemberCustom() {
+        List<Member> memberCustom = memberRepository.findMemberCustom();
+    }
 }
