@@ -1,5 +1,6 @@
 ## Spring Boot Version
-* 2.7.9
+* 2.7.1
+* Java 11
 
 ## Libraries
 * Spring Web
