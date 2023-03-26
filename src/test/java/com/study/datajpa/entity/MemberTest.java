@@ -1,8 +1,10 @@
 package com.study.datajpa.entity;
 
+import com.study.datajpa.repository.MemberRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,9 @@ class MemberTest {
 
     @PersistenceContext
     EntityManager em;
+
+    @Autowired
+    MemberRepository memberRepository;
 
     @Test
     @DisplayName("Member & Team Entity가 서로 잘 연관관계 맺어졌는지 테스트")
@@ -48,6 +53,29 @@ class MemberTest {
             log.info("member = {}", member);
             log.info("--> member.team = {}", member.getTeam());
         }
+    }
+
+    @Test
+    @DisplayName("BaseEntity 테스트")
+    void jpaBaseEntity() throws InterruptedException {
+        // given
+        Member member = new Member("member1");
+        memberRepository.save(member); // @Prepersist
+
+        Thread.sleep(100);
+        member.setUsername("member2");
+
+        em.flush(); // @PreUpdate
+        em.clear();
+
+        // when
+        Member findMember = memberRepository.findById(member.getId()).get();
+
+        // then
+        log.info("findMember.getCreatedDate={}", findMember.getCreatedDate());
+        log.info("findMember.getUpdatedDate={}", findMember.getLastModifiedDate());
+        log.info("findMember.getCreatedBy={}", findMember.getCreatedBy());
+        log.info("findMember.getLastModifiedBy={}", findMember.getLastModifiedBy());
     }
 
 }

@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Entity // Entity 사용시 protected 제어레벨 이상의 기본생성자 필수
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(of = {"id", "username", "age"}) // 연관관계(Team)은 toString() 하지말자 (무한루프 빠질 수 있음)
-public class Member {
+public class Member extends BaseEntity{
 
     @Id
     @GeneratedValue
