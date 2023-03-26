@@ -430,4 +430,24 @@ class MemberRepositoryTest {
         // then
         assertThat(result.size()).isEqualTo(1);
     }
+
+    @Test
+    @DisplayName("NativeQuery")
+    void nativeQuery() {
+        // given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 10, teamA);
+        Member m2 = new Member("m2", 20, teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        // when
+        Member result = memberRepository.findByNativeQuery("m1");
+        log.info("result={}", result);
+    }
 }
